@@ -1,0 +1,42 @@
+# Fixed overlay for the dsh backend, applied on top of the shipped `headless`
+# profile with `--patch`. The model route is a second, generated overlay (see
+# dsh.sh). Nothing here carries a secret. See references/dsh.md.
+
+# headless ships with the credential store off, so it would only see an
+# exported DEEPSEEK_API_KEY. Turned back on, the key and the account token are
+# read inside the dsh process from ~/.dsh/.credentials.yaml and never reach the
+# agent's tool environment.
+- id: credentials
+  name: '@deepseek-ai/dsh-credentials-local'
+  disabled: false
+
+# On by default: every official-API request also carries the full session
+# event log (tool outputs and file contents included) as a side field. Repo
+# and customer data has no business there.
+- id: session-log-deepseek
+  name: '@deepseek-ai/dsh-session-log-deepseek'
+  config:
+    enabled: false
+
+# A subagent or workflow writes its own session file, which watch.py and
+# tripwire.py would never see. Goals keep a session going across automatic
+# continuation rounds, past the step boundary the supervisor reviews at.
+- id: tool-subagent
+  name: '@deepseek-ai/dsh-tool-subagent'
+  disabled: true
+- id: tool-subagent-fork
+  name: '@deepseek-ai/dsh-tool-subagent'
+  disabled: true
+- id: tool-subagent-control
+  name: '@deepseek-ai/dsh-tool-subagent-control'
+  disabled: true
+- id: tool-subagent-list-agents
+  name: '@deepseek-ai/dsh-tool-subagent-control/list-agents'
+  disabled: true
+- id: tool-workflow
+  name: '@deepseek-ai/dsh-tool-workflow'
+  disabled: true
+- id: tool-goal
+  disabled: true
+- id: goal-round-driver
+  disabled: true
